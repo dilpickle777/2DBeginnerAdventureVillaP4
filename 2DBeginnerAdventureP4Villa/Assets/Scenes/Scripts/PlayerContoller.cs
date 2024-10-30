@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerContoller : MonoBehaviour
 {
@@ -22,5 +23,12 @@ public class PlayerContoller : MonoBehaviour
 
       
     }
+    private void FixedUpdate()
+    {
+        Vector2 position = rigidbody2d.position;
+        position.x = position.x + 10.0f * horizontal * Time.deltaTime;
+        position.y = position.y + 10.0f * vertical * Time.deltaTime;
 
-}
+        rigidbody2d.MovePosition(position);
+    }
+}  
