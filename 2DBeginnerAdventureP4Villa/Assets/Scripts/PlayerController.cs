@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,13 +8,18 @@ public class PlayerController : MonoBehaviour
 {
     public float speed = 10.0f;
     public int maxHealth = 5;
+    public float timeInvincible = 2.0f;
     public int health { get { return currentHealth; } }
     int currentHealth;
+
+    bool isInvincible;
+    float invincibleTimer;
 
 
     Rigidbody2D rigidbody2d;
     float horizontal;
     float vertical;
+
 
     Animator animator;
     Vector2 lookDirection = new Vector2(1, 0);
@@ -36,10 +42,26 @@ public class PlayerController : MonoBehaviour
         Vector2 move = new Vector2(horizontal, vertical);
 
         if (!Mathf.Approximately(move.x, 0.0f) || !Mathf.Approximately(move.y, 0.0f))
-        { }
+        {
+            lookDirection.Set(move.x, move.y);
+            lookDirection.Normalize();
 
-    }
-    private void FixedUpdate()
+        }
+        animator.SetFloat("Look X", lookDirection.x);
+        animator.SetFloat("Look Y", lookDirection.y);
+        animator.SetFloat("Speed", move.magnitude);
+
+        if(isInvincible)
+        {
+            invincibleTimer -= Time.deltaTime;
+            if(invincibleTimer < 0)
+            {
+                isInvincible = false;
+            }
+        }
+
+    }     
+    void FixedUpdate()
     {
         Vector2 position = rigidbody2d.position;
         position.x = position.x + speed * horizontal * Time.deltaTime;
@@ -49,6 +71,17 @@ public class PlayerController : MonoBehaviour
     }
     public void ChangeHealth(int amount)
     {
+        if(amount < 0)
+        {
+            animator.SetTrigger("Hit");
+
+            if(isInvincible)
+            {
+                return;
+            }
+            isInvincible = true;
+            invincibleTimer = timeInvincible;
+        }
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
         Debug.Log(currentHealth + "/" + maxHealth);
     
